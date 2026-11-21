@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCBE Add-on Studio</title>
+    <style>
+        :root {
+            --bg-color: #181818;
+            --card-bg: #262626;
+            --sub-bg: #1f1f1f;
+            --mc-green: #3c8527;
+            --mc-green-hover: #2a641c;
+            --text-color: #f0f0f0;
+            --border-color: #3d3d3d;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 920px;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #55ff55;
+            font-size: 1.3rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin: 0 0 12px 0;
+        }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.85rem; }
+        input[type="text"], input[type="number"], input[type="color"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: #141414;
+            color: var(--text-color);
+            font-size: 16px;
+        }
+        input[type="color"] { height: 38px; padding: 2px; }
+        input[type="file"] {
+            width: 100%;
+            padding: 7px;
+            background-color: #141414;
+            border: 1px dashed #666;
+            border-radius: 5px;
+            color: #ccc;
+            font-size: 13px;
+        }
+        .row { display: flex; gap: 8px; }
+        .row .form-group { flex: 1; }
+        button {
+            background-color: var(--mc-green);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background-color: var(--mc-green-hover); }
+        .btn-small { background-color: #444; padding: 7px 10px; font-size: 12px; width: auto; }
+        .btn-add { background-color: #2b6cb0; padding: 9px 12px; font-size: 13px; width: auto; }
+        .btn-play { background-color: #d69e2e; color: #111; padding: 7px 12px; font-size: 12px; width: auto; }
+        .btn-danger { background-color: #9b2c2c; padding: 5px 8px; font-size: 11px; width: auto; }
+        .mode-switcher {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            background: #141414;
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 10px 6px;
+            font-size: 12px;
+            background: #2b2b2b;
+            color: #bbb;
+            border: 2px solid transparent;
+            border-radius: 6px;
+        }
+        .mode-btn.active-both { background: #22543d; color: #fff; border-color: #48bb78; }
+        .mode-btn.active-rp { background: #1a365d; color: #fff; border-color: #4299e1; }
+        .mode-btn.active-bp { background: #744210; color: #fff; border-color: #ecc94b; }
+        .sub-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .tab-btn {
+            background: #333;
+            color: #ccc;
+            padding: 7px 12px;
+            font-size: 12px;
+            width: auto;
+            white-space: nowrap;
+            border-radius: 20px;
+        }
+        .tab-btn.active { background: var(--mc-green); color: #fff; }
+        .panel-box {
+            background: var(--sub-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .panel-title {
+            font-weight: bold;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+        }
+        .added-card {
+            background: #141414;
+            border: 1px solid #3d3d3d;
+            border-radius: 5px;
+            padding: 8px;
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            gap: 6px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 5px;
+            font-size: 10px;
+            border-radius: 3px;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #141414;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            gap: 8px;
+        }
+        .canvas-box {
+            width: 100%;
+            height: 270px;
+            background: #101010;
+            border: 1px solid #555;
+            border-radius: 6px;
+            position: relative;
+            touch-action: none;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .canvas-box canvas { width: 100%; height: 100%; display: block; }
+        .timeline-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #141414;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: #141414;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .data-table th, .data-table td { border: 1px solid #383838; padding: 5px 7px; text-align: center; }
+        .data-table th { background: #262626; color: #55ff55; }
+        .code-editor {
+            width: 100%;
+            height: 200px;
+            background: #111;
+            color: #78dce8;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        pre { background: #111; padding: 8px; border-radius: 5px; overflow-x: auto; color: #a9dc76; font-size: 11px; max-height: 160px; }
+        .script-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #383838; gap: 6px; }
+        @media screen and (max-width: 768px) {
+            body { padding: 4px; }
+            .container { padding: 10px; }
+            .row { flex-direction: column; gap: 4px; }
+            .mode-switcher { flex-direction: column; }
+            .top-bar { flex-direction: column; align-items: stretch; }
+            .script-item { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>MCBE Add-on Studio</h1>
+    <div style="text-align:center; font-size:11px; color:#888; margin-top:-8px; margin-bottom:10px;">
+        非公式 Minecraft Bedrock アドオン・3Dモデル作成ツール
+    </div>
+
+    <!-- ステップ1：最初の決定・保存画面 -->
+    <div id="setupScreen">
+        <div class="panel-box">
+            <div class="panel-title">ステップ1：作成するパックを決定</div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="packType">パックの種類</label>
+                    <select id="packType">
+                        <option value="addon">アドオン (RP + BP)</option>
+                        <option value="resources">リソースパック (RP)</option>
+                        <option value="data">ビヘイビアパック (BP)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fileFormat">出力形式</label>
+                    <select id="fileFormat">
+                        <option value="mcpack">.mcpack / .mcaddon</option>
+                        <option value="zip">.zip</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group"><label for="packName">パック名</label><input type="text" id="packName" value="My Custom Addon"></div>
+                <div class="form-group"><label for="minEngine">対応バージョン</label><input type="text" id="minEngine" value="1.21.40"></div>
+                <div class="form-group"><label for="packVersion">バージョン</label><input type="text" id="packVersion" value="1.0.0"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="packDesc">説明文</label>
+                <textarea id="packDesc" rows="2">オリジナルのMinecraft Bedrockアドオンです。</textarea>
+            </div>
+            <div class="form-group" style="margin-top:6px;">
+                <label style="font-weight:normal; font-size:13px; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="linkRpBpDeps" checked onchange="updatePreview()">
+                    <span>🔗 RP と BP の依存関係 (dependencies) を自動で紐付ける</span>
+                </label>
+            </div>
+
+            <button type="button" onclick="confirmSetupAndSave()">✅ この設定で決定・保存して編集へ進む</button>
+        </div>
+    </div>
+
+    <!-- ステップ2：メイン編集ワークスペース -->
+    <div id="workspaceScreen" style="display: none;">
+        <div class="top-bar">
+            <div>
+                <strong id="wsPackTitle" style="color: #55ff55;">My Custom Addon</strong>
+                <div id="wsPackBadge" style="font-size: 12px; color: #aaa;">モード: アドオン (RP + BP)</div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn-small" onclick="backToSetup()">⚙ 初期設定へ</button>
+                <button type="button" id="downloadBtn" style="width: auto; padding: 7px 14px;" onclick="downloadPack()">📦 .mcaddon 出力</button>
+            </div>
+        </div>
+
+        <div id="modeSwitcher" class="mode-switcher" style="display: none;">
+            <button type="button" id="btnModeBoth" class="mode-btn" onclick="switchEditorMode('both')">⚡ 両方連動 (RP + BP一括)</button>
+            <button type="button" id="btnModeRp" class="mode-btn" onclick="switchEditorMode('rp')">🎨 RP (リソース) を編集</button>
+            <button type="button" id="btnModeBp" class="mode-btn" onclick="switchEditorMode('bp')">⚙️ BP (ビヘイビア) を編集</button>
+        </div>
+
+        <!-- 【モードA】両方連動 -->
+        <div id="areaBoth" style="display: none;">
+            <div class="panel-box">
+                <div class="panel-title">⚡ RP + BP 連動アイテム追加（見た目＋性能を一括作成）</div>
+                <div class="row">
+                    <div class="form-group"><label>アイテムID</label><input type="text" id="bothItemId" value="custom:fire_sword"></div>
+                    <div class="form-group"><label>表示名</label><input type="text" id="bothItemName" value="炎の剣"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>攻撃力 (BP)</label><input type="number" id="bothItemDamage" value="10" min="1"></div>
+                    <div class="form-group">
+                        <label>3D形状 (RP)</label>
+                        <select id="bothItemPreset">
+                            <option value="sword">立体剣・スタッフ型</option>
+                            <option value="block_item">立体ブロック・箱型</option>
+                            <option value="hat">頭装備・ヘルメット型</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>3Dテクスチャ .png (任意)</label><input type="file" id="bothItemTex" accept="image/png"></div>
+                    <div class="form-group"><label>既存 .geo.json (任意)</label><input type="file" id="bothItemGeo" accept=".json"></div>
+                </div>
+                <button type="button" class="btn-add" style="width: 100%;" onclick="addLinkedItem()">＋ RPとBPの両方にアイテムを追加</button>
+                <div id="bothItemsList"></div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-title">⚡ RP + BP 連動モブ追加（3Dモデル＋召喚卵・体力一括作成）</div>
+                <div class="row">
+                    <div class="form-group"><label>エンティティID</label><input type="text" id="bothMobId" value="custom:guard_bot"></div>
+                    <div class="form-group"><label>表示名</label><input type="text" id="bothMobName" value="ガードロボット"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>最大体力 HP (BP)</label><input type="number" id="bothMobHealth" value="30" min="1"></div>
+                    <div class="form-group">
+                        <label>3D形状プリセット (RP)</label>
+                        <select id="bothMobPreset">
+                            <option value="humanoid">人型 (頭・胴体・両腕・両足)</option>
+                            <option value="quadruped">四足歩行 (頭・胴体・4本足)</option>
+                            <option value="cube">キューブ / スライム型</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>スケール倍率</label><input type="number" id="bothMobScale" value="1.0" step="0.1" min="0.1"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>テクスチャ .png (任意)</label><input type="file" id="bothMobTex" accept="image/png"></div>
+                    <div class="form-group"><label>既存 .geo.json (任意)</label><input type="file" id="bothMobGeo" accept=".json"></div>
+                </div>
+                <button type="button" class="btn-add" style="width: 100%;" onclick="addLinkedMob()">＋ RPとBPの両方にモブを追加</button>
+                <div id="bothMobsList"></div>
+            </div>
+        </div>
+
+        <!-- 【モードB】RP（リソースパック）専用編集エリア -->
+        <div id="areaRp" style="display: none;">
+                        <div class="sub-tabs">
+                <button type="button" id="tabRpModel" class="tab-btn active" onclick="switchSubTab('rp', 'model')">🧊 3Dモデル (2D/3D Edit)</button>
+                <button type="button" id="tabRpItem2D" class="tab-btn" onclick="switchSubTab('rp', 'item2d')">🗡 2Dアイテム (ドット絵)</button>
+                <button type="button" id="tabRpAnim" class="tab-btn" onclick="switchSubTab('rp', 'anim')">🎬 アニメーション</button>
+                <button type="button" id="tabRpParticle" class="tab-btn" onclick="switchSubTab('rp', 'particle')">✨ パーティクル</button>
+            </div>
+
+
+            <!-- RPタブ1：Crafty Craft風 2D Edit & 3D Edit モデルビルダー -->
+            <div id="rpViewModel" class="panel-box">
+                <div class="panel-title">
+                    <span>🧊 3Dモデルビルダー</span>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" id="btnView2D" class="btn-play" onclick="switchModelEditMode('2d')">📐 2D Edit</button>
+                        <button type="button" id="btnView3D" class="btn-small" onclick="switchModelEditMode('3d')">🎲 3D Edit</button>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:6px; background:#141414; padding:8px; border-radius:6px; border:1px solid #383838; margin-bottom:10px; flex-wrap:wrap;">
+                    <button type="button" id="btnToolOrbit" class="btn-small" onclick="setCanvasTool('orbit')">👁 回転</button>
+                    <button type="button" id="btnToolPen" class="btn-play" onclick="setCanvasTool('pen')">🖊 ペン(1px)</button>
+                    <button type="button" id="btnToolFill" class="btn-small" onclick="setCanvasTool('fill')">🪣 バケツ</button>
+                    <div style="display:flex; align-items:center; gap:4px; margin-left:auto;">
+                        <input type="color" id="brushColor" value="#ff4444" style="width:40px; height:34px; padding:2px;">
+                        <button type="button" class="btn-small" style="background:#e53e3e; padding:6px 8px;" onclick="setBrush('#e53e3e')"> </button>
+                        <button type="button" class="btn-small" style="background:#3182ce; padding:6px 8px;" onclick="setBrush('#3182ce')"> </button>
+                        <button type="button" class="btn-small" style="background:#38a169; padding:6px 8px;" onclick="setBrush('#38a169')"> </button>
+                        <button type="button" class="btn-small" style="background:#ecc94b; padding:6px 8px;" onclick="setBrush('#ecc94b')"> </button>
+                        <button type="button" class="btn-small" style="background:#ffffff; padding:6px 8px;" onclick="setBrush('#ffffff')"> </button>
+                        <button type="button" class="btn-small" style="background:#1a202c; border:1px solid #666; padding:6px 8px;" onclick="setBrush('#1a202c')"> </button>
+                    </div>
+                    <div id="eyedropperToast" style="width:100%; font-size:11px; color:#a9dc76; text-align:center;">
+                        💡 ペン/バケツ中も「ドットの長押し」でスポイト（色吸い取り）ができます
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>モデル用途</label>
+                        <select id="builderModelType">
+                            <option value="mob">モブ (entity)</option>
+                            <option value="item">3Dアイテム (attachable)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>識別ID</label><input type="text" id="builderModelId" value="custom:my_model"></div>
+                    <div class="form-group">
+                        <label>プリセット読込</label>
+                        <select id="builderPresetSelect" onchange="loadBuilderPreset(this.value)">
+                            <option value="humanoid">人型 (頭・胴・腕・足)</option>
+                            <option value="quadruped">四足歩行 (頭・胴・4足)</option>
+                            <option value="sword">立体剣 (柄・鍔・刀身)</option>
+                            <option value="empty">空から作る (1キューブ)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="modelEditor2D">
+                    <div class="canvas-box" style="height: 270px;"><canvas id="canvas2D"></canvas></div>
+                    <div style="font-size:11px; color:#aaa; margin-bottom:8px; text-align:center;">
+                        スキン展開図 (UVマップ) — なぞって1px描画 / ドット長押しでスポイト
+                    </div>
+                </div>
+
+                <div id="modelEditor3D" style="display: none;">
+                    <div class="canvas-box" style="height: 280px;">
+                        <canvas id="canvas3DModel"></canvas>
+                        <div style="position:absolute; top:6px; left:8px; font-size:11px; color:#aaa; pointer-events:none;">
+                            ペン: 直接1px塗り / ドット長押し: スポイト / 2本指: ズーム
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:#141414; padding:10px; border-radius:6px; border:1px solid #383838; margin-bottom:10px;">
+                    <div class="row">
+                        <div class="form-group"><label>ボーン名 (パーツ名)</label><input type="text" id="partBoneName" value="head"></div>
+                        <div class="form-group"><label>ベース色</label><input type="color" id="partColor" value="#4299e1" oninput="liveUpdateSelectedPart()"></div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group"><label>位置 X</label><input type="number" id="partX" value="-4" step="1" oninput="liveUpdateSelectedPart()"></div>
+                        <div class="form-group"><label>位置 Y</label><input type="number" id="partY" value="24" step="1" oninput="liveUpdateSelectedPart()"></div>
+                        <div class="form-group"><label>位置 Z</label><input type="number" id="partZ" value="-4" step="1" oninput="liveUpdateSelectedPart()"></div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group"><label>幅 W</label><input type="number" id="partW" value="8" min="1" step="1" oninput="liveUpdateSelectedPart()"></div>
+                        <div class="form-group"><label>高さ H</label><input type="number" id="partH" value="8" min="1" step="1" oninput="liveUpdateSelectedPart()"></div>
+                        <div class="form-group"><label>奥行 D</label><input type="number" id="partD" value="8" min="1" step="1" oninput="liveUpdateSelectedPart()"></div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn-small" style="flex:1;" onclick="addOrUpdateModelPart()">＋ 新規パーツ追加</button>
+                        <button type="button" class="btn-add" style="flex:1;" onclick="saveBuiltModelToPack()">💾 この3Dモデルをパックに保存</button>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead><tr><th>ボーン</th><th>位置</th><th>サイズ</th><th>色</th><th>操作</th></tr></thead>
+                    <tbody id="modelPartsTable"></tbody>
+                </table>
+
+                <div style="margin-top:8px;">
+                    <label>テクスチャ画像 .png 上書き (任意)</label>
+                    <input type="file" id="builderTexFile" accept="image/png">
+                </div>
+                <div id="rpModelsList"></div>
+            </div>
+            <div id="rpViewAnim" class="panel-box" style="display: none;">
+                <div class="panel-title">
+                    <span>🎬 アニメーション作成 ＆ 3D再生</span>
+                    <button type="button" class="btn-small" onclick="loadSampleWalkAnim()">歩行サンプル</button>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>アニメーションID</label><input type="text" id="animId" value="animation.custom.walk"></div>
+                    <div class="form-group"><label>長さ (秒)</label><input type="number" id="animLength" value="1.0" step="0.1" min="0.2" onchange="updateAnimDuration()"></div>
+                    <div class="form-group">
+                        <label>ループ</label>
+                        <select id="animLoop">
+                            <option value="true">ループ (true)</option>
+                            <option value="false">1回のみ (false)</option>
+                            <option value="hold_on_last_frame">最終フレーム停止</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="canvas-box">
+                    <canvas id="canvas3DAnim"></canvas>
+                    <div style="position:absolute; top:6px; left:8px; font-size:11px; color:#aaa; pointer-events:none;">
+                        3Dビルダーのモデルで再生中 (指ドラッグで回転)
+                    </div>
+                </div>
+                <div class="timeline-bar">
+                    <button type="button" id="playPauseBtn" class="btn-play" onclick="togglePlayAnim()">▶ 再生</button>
+                    <button type="button" class="btn-small" onclick="stopAnim()">■ 停止</button>
+                    <input type="range" id="timeSlider" min="0" max="1" step="0.05" value="0" style="flex:1; min-width:130px;" oninput="scrubAnim(this.value)">
+                    <span id="timeDisplay" style="font-family:monospace; font-size:12px;">0.00 / 1.00s</span>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>動かすボーン名</label><select id="kfBone"></select></div>
+                    <div class="form-group"><label>時間 (秒)</label><input type="number" id="kfTime" value="0.0" step="0.1" min="0"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>回転 X (°)</label><input type="number" id="kfRotX" value="0" step="5"></div>
+                    <div class="form-group"><label>回転 Y (°)</label><input type="number" id="kfRotY" value="0" step="5"></div>
+                    <div class="form-group"><label>回転 Z (°)</label><input type="number" id="kfRotZ" value="0" step="5"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>位置 X</label><input type="number" id="kfPosX" value="0" step="0.5"></div>
+                    <div class="form-group"><label>位置 Y</label><input type="number" id="kfPosY" value="0" step="0.5"></div>
+                    <div class="form-group"><label>位置 Z</label><input type="number" id="kfPosZ" value="0" step="0.5"></div>
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <button type="button" class="btn-small" style="flex:1;" onclick="addOrUpdateKeyframe()">キーフレーム追加</button>
+                    <button type="button" class="btn-add" style="flex:1;" onclick="saveAnimationToPack()">＋ パックに保存</button>
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>ボーン</th><th>時間</th><th>回転</th><th>位置</th><th>削除</th></tr></thead>
+                    <tbody id="kfTableBody"></tbody>
+                </table>
+                <div id="savedAnimList"></div>
+            </div>
+            <!-- RPタブ：2Dアイテム（ドット絵お絵描きエディタ） -->
+            <div id="rpViewItem2D" class="panel-box" style="display: none;">
+                <div class="panel-title">
+                    <span>🗡 2Dアイテム作成 (ドット絵テクスチャ)</span>
+                    <select id="item2dRes" style="width:auto; padding:5px 8px; font-size:12px;" onchange="initItem2DGrid()">
+                        <option value="16">16 × 16 (標準)</option>
+                        <option value="32">32 × 32 (高精細)</option>
+                    </select>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px; background:#141414; padding:8px; border-radius:6px; border:1px solid #383838; margin-bottom:8px; flex-wrap:wrap;">
+                    <button type="button" id="i2dToolPen" class="btn-play" onclick="setItem2DTool('pen')">✏ ペン</button>
+                    <button type="button" id="i2dToolFill" class="btn-small" onclick="setItem2DTool('fill')">🪣 塗り</button>
+                    <button type="button" id="i2dToolLine" class="btn-small" onclick="setItem2DTool('line')">📏 ライン</button>
+                    <button type="button" id="i2dToolCircle" class="btn-small" onclick="setItem2DTool('circle')">⭕ 円</button>
+                    <button type="button" id="i2dToolErase" class="btn-small" onclick="setItem2DTool('erase')">🧽 消す</button>
+                    <button type="button" class="btn-danger" onclick="clearItem2DCanvas()">🗑 全消</button>
+                    <div style="display:flex; align-items:center; gap:5px; margin-left:auto;">
+                        <input type="color" id="item2dColor" value="#ff5555" style="width:40px; height:32px; padding:2px;">
+                        <span id="item2dToast" style="font-size:11px; color:#a9dc76;">長押しでスポイト</span>
+                    </div>
+                </div>
+
+                <div class="canvas-box" style="height: 280px; max-width: 280px; margin: 0 auto 10px auto;">
+                    <canvas id="canvasItem2D"></canvas>
+                </div>
+
+                <div class="row">
+                    <div class="form-group"><label>アイテムID</label><input type="text" id="item2dId" value="custom:ruby_sword"></div>
+                    <div class="form-group"><label>表示名</label><input type="text" id="item2dName" value="ルビーの剣"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>攻撃力 (BP連動時)</label><input type="number" id="item2dDamage" value="9" min="1"></div>
+                    <div class="form-group"><label>最大スタック数</label><input type="number" id="item2dStack" value="1" min="1" max="64"></div>
+                </div>
+                <label style="font-weight:normal; font-size:13px; display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                    <input type="checkbox" id="item2dLinkBp" checked>
+                    <span>BP（ビヘイビアパック）のアイテムデータも同時に作成する</span>
+                </label>
+                <button type="button" class="btn-add" style="width:100%;" onclick="saveItem2DToPack()">💾 描いた2Dアイテムをパックに保存</button>
+                <div id="savedItem2DList"></div>
+            </div>
+
+            <div id="rpViewParticle" class="panel-box" style="display: none;">
+                <div class="panel-title">✨ パーティクル追加</div>
+                <div class="form-group"><label>1. パーティクルJSON (.particle.json)</label><input type="file" id="particleJsonFiles" accept=".json" multiple onchange="updateParticleFileList()"><div id="particleJsonList" style="font-size:12px; color:#a9dc76; margin-top:4px;"></div></div>
+                <div class="form-group"><label>2. パーティクル画像 (.png)</label><input type="file" id="particleTexFiles" accept="image/png" multiple onchange="updateParticleFileList()"><div id="particleTexList" style="font-size:12px; color:#a9dc76; margin-top:4px;"></div></div>
+                <label style="font-weight:normal; font-size:13px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="autoFixParticlePath" checked><span>JSON内のテクスチャ参照パスを自動調整する</span></label>
+                                <button type="button" class="btn-add" style="width:100%; margin-top:8px;" onclick="addParticlesToPack()">＋ パーティクルをパックに追加</button>
+                <div id="savedParticlesList"></div>
+
+            </div>
+        </div>
+
+        <div id="areaBp" style="display: none;">
+            <div class="sub-tabs">
+                <button type="button" id="tabBpScript" class="tab-btn active" onclick="switchSubTab('bp', 'script')">📜 Script API (main.js)</button>
+                <button type="button" id="tabBpData" class="tab-btn" onclick="switchSubTab('bp', 'data')">⚔️ BP単体アイテム・モブ</button>
+            </div>
+            <div id="bpViewScript" class="panel-box">
+                <div class="panel-title"><span>📜 Script API モジュール設定</span><div style="display:flex; gap:6px;"><button type="button" class="btn-small" onclick="toggleAllScripts(true)">全オン</button><button type="button" class="btn-small" onclick="toggleAllScripts(false)">全オフ</button></div></div>
+                <div class="form-group"><label>エントリーポイント</label><input type="text" id="scriptEntry" value="scripts/main.js" oninput="updatePreview()"></div>
+                <div id="scriptModulesList" style="margin-bottom: 10px;"></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;"><label style="margin:0;">scripts/main.js 直接編集</label><button type="button" class="btn-small" onclick="resetJsEditor()">リセット</button></div>
+                <textarea id="jsEditor" class="code-editor" spellcheck="false"></textarea>
+            </div>
+            <div id="bpViewData" class="panel-box" style="display: none;">
+                <div class="panel-title">⚔️ BP専用 アイテム・モブデータ追加</div>
+                <div class="row">
+                    <div class="form-group"><label>種別</label><select id="bpOnlyType"><option value="item">アイテム</option><option value="mob">モブ</option></select></div>
+                    <div class="form-group"><label>ID</label><input type="text" id="bpOnlyId" value="custom:special_item"></div>
+                </div>
+                <div class="row">
+                    <div class="form-group"><label>表示名</label><input type="text" id="bpOnlyName" value="スペシャルアイテム"></div>
+                    <div class="form-group"><label>数値 (攻撃力 / HP)</label><input type="number" id="bpOnlyVal" value="8" min="1"></div>
+                </div>
+                <button type="button" class="btn-add" style="width:100%;" onclick="addBpOnlyData()">＋ BPデータを追加</button>
+                <div id="bpDataList"></div>
+            </div>
+        </div>
+
+        <div class="panel-box">
+            <div class="panel-title"><span>📄 生成される manifest.json プレビュー</span><button type="button" class="btn-small" onclick="regenerateUUIDs()">UUID再生成</button></div>
+            <pre id="jsonPreview"></pre>
+        </div>
+    </div>
+</div>
+<script>
+    const SCRIPT_MODULES = new Array(
+        { id: "server", name: "@minecraft/server", desc: "基本API (ワールド・イベント)", defaultVer: "1.15.0" },
+        { id: "server-ui", name: "@minecraft/server-ui", desc: "フォームUI (ボタン・入力画面)", defaultVer: "1.3.0" },
+        { id: "server-gametest", name: "@minecraft/server-gametest", desc: "GameTest・疑似プレイヤー", defaultVer: "1.0.0-beta" },
+        { id: "server-net", name: "@minecraft/server-net", desc: "HTTP通信 (BDS専用)", defaultVer: "1.0.0-beta" },
+        { id: "server-admin", name: "@minecraft/server-admin", desc: "サーバー管理 (BDS専用)", defaultVer: "1.0.0-beta" }
+    );
+    let uuids = { rpHeader: "", rpMod: "", bpHeader: "", bpMod: "" };
+    let mobModels = new Array(), itemModels = new Array(), bpItems = new Array(), bpMobs = new Array(), savedAnimations = new Array(), currentKeyframes = new Array(), builderParts = new Array();
+    function vec3(x, y, z) { return new Array(x, y, z); }
+    function vec2(u, v) { return new Array(u, v); }
+
+    let viewCam = { yaw: 0.6, pitch: 0.35, zoom: 6.5 };
+    let canvasToolMode = 'pen';
+    let renderedFaces3D = new Array(), renderedRects2D = new Array();
+    let isTouchDrag = false, lastPt = { x: 0, y: 0 }, lastPinchDist = 0, longPressTimer = null, didEyedropper = false;
+
+    function setCanvasTool(mode) {
+        canvasToolMode = mode;
+        document.getElementById('btnToolOrbit').className = (mode === 'orbit') ? 'btn-play' : 'btn-small';
+        document.getElementById('btnToolPen').className = (mode === 'pen') ? 'btn-play' : 'btn-small';
+        document.getElementById('btnToolFill').className = (mode === 'fill') ? 'btn-play' : 'btn-small';
+    }
+
+    function setBrush(hex) {
+        document.getElementById('brushColor').value = hex;
+        if (canvasToolMode === 'orbit') setCanvasTool('pen');
+    }
+
+    function triggerEyedropper(hex) {
+        if (!hex) return;
+        document.getElementById('brushColor').value = hex;
+        didEyedropper = true;
+        if (navigator.vibrate) navigator.vibrate(40);
+        const toast = document.getElementById('eyedropperToast');
+        if (toast) { toast.textContent = `💧 スポイト取得: ${hex}`; toast.style.color = '#55ff55'; }
+    }
+
+    function ensurePartPixels(p) {
+        const dims = new Array(vec2(p.w, p.h), vec2(p.w, p.h), vec2(p.w, p.d), vec2(p.w, p.d), vec2(p.d, p.h), vec2(p.d, p.h));
+        if (!p.pixels || p.pixels.length !== 6) p.pixels = new Array(null, null, null, null, null, null);
+        for (let f = 0; f < 6; f++) {
+            const cols = Math.max(1, Math.round(dims.at(f).at(0)));
+            const rows = Math.max(1, Math.round(dims.at(f).at(1)));
+            const cur = p.pixels.at(f);
+            if (!cur || cur.length !== rows || cur.at(0).length !== cols) {
+                const grid = new Array();
+                for (let r = 0; r < rows; r++) {
+                    const rowArr = new Array();
+                    for (let c = 0; c < cols; c++) rowArr.push(p.color || '#4299e1');
+                    grid.push(rowArr);
+                }
+                p.pixels.splice(f, 1, grid);
+            }
+        }
+    }
+
+    function applyPaintToPixel(partIdx, faceIdx, px, py, isEyedrop) {
+        const p = builderParts.at(partIdx);
+        if (!p) return;
+        ensurePartPixels(p);
+        const grid = p.pixels.at(faceIdx);
+        if (!grid || py < 0 || py >= grid.length || px < 0 || px >= grid.at(0).length) return;
+        if (isEyedrop) { triggerEyedropper(grid.at(py).at(px)); return; }
+        const brush = document.getElementById('brushColor').value;
+        if (canvasToolMode === 'fill') {
+            for (let r = 0; r < grid.length; r++) {
+                const row = grid.at(r);
+                for (let c = 0; c < row.length; c++) row.splice(c, 1, brush);
+            }
+        } else {
+            grid.at(py).splice(px, 1, brush);
+        }
+        p.color = brush;
+        refreshModelViews();
+    }
+
+    function draw2DEditor() {
+        const cvs = document.getElementById('canvas2D');
+        if (!cvs) return;
+        const rect = cvs.parentElement.getBoundingClientRect();
+        cvs.width = rect.width || 340; cvs.height = rect.height || 270;
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        ctx.fillStyle = '#121212'; ctx.fillRect(0, 0, w, h);
+        renderedRects2D = new Array();
+
+        const colsCount = Math.max(1, builderParts.length);
+        const cellW = Math.floor((w - 16) / colsCount);
+        let curX = 8;
+
+        builderParts.forEach((p, partIdx) => {
+            ensurePartPixels(p);
+            ctx.fillStyle = '#55ff55'; ctx.font = 'bold 11px sans-serif';
+            ctx.fillText(p.bone, curX + 2, 14);
+            let curY = 22;
+            const maxFaceW = Math.max(p.w, p.d), totalFaceH = p.h * 2 + p.d * 2 + 12;
+            const pxSize = Math.max(3, Math.min(Math.floor((cellW - 10) / maxFaceW), Math.floor((h - 32) / totalFaceH)));
+
+            for (let f = 0; f < 6; f++) {
+                const grid = p.pixels.at(f);
+                const rows = grid.length, cols = grid.at(0).length;
+                const boxW = cols * pxSize, boxH = rows * pxSize;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        ctx.fillStyle = grid.at(r).at(c);
+                        ctx.fillRect(curX + c * pxSize, curY + r * pxSize, pxSize, pxSize);
+                        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.5;
+                        ctx.strokeRect(curX + c * pxSize, curY + r * pxSize, pxSize, pxSize);
+                    }
+                }
+                ctx.strokeStyle = '#666'; ctx.lineWidth = 1; ctx.strokeRect(curX, curY, boxW, boxH);
+                renderedRects2D.push({ partIdx, faceIdx: f, x: curX, y: curY, w: boxW, h: boxH, cols, rows, pxSize });
+                curY += boxH + 3;
+            }
+            curX += cellW;
+        });
+    }
+    function pointInPolygon(px, py, pts) {
+        let inside = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            const xi = pts.at(i).sx, yi = pts.at(i).sy, xj = pts.at(j).sx, yj = pts.at(j).sy;
+            const intersect = ((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / ((yj - yi) || 0.0001) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    function hitTest2D(clientX, clientY, cvs) {
+        const rect = cvs.getBoundingClientRect();
+        const x = (clientX - rect.left) * (cvs.width / rect.width);
+        const y = (clientY - rect.top) * (cvs.height / rect.height);
+        for (let i = renderedRects2D.length - 1; i >= 0; i--) {
+            const r = renderedRects2D.at(i);
+            if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) {
+                return { partIdx: r.partIdx, faceIdx: r.faceIdx, px: Math.floor((x - r.x) / r.pxSize), py: Math.floor((y - r.y) / r.pxSize) };
+            }
+        }
+        return null;
+    }
+
+    function hitTest3D(clientX, clientY, cvs) {
+        const rect = cvs.getBoundingClientRect();
+        const x = (clientX - rect.left) * (cvs.width / rect.width);
+        const y = (clientY - rect.top) * (cvs.height / rect.height);
+        for (let i = renderedFaces3D.length - 1; i >= 0; i--) {
+            const f = renderedFaces3D.at(i);
+            if (pointInPolygon(x, y, f.pts)) return { partIdx: f.partIdx, faceIdx: f.faceIdx, px: f.px, py: f.py };
+        }
+        return null;
+    }
+
+    function handleCanvasAction(clientX, clientY, cvs, is2D, isEyedrop) {
+        const hit = is2D ? hitTest2D(clientX, clientY, cvs) : hitTest3D(clientX, clientY, cvs);
+        if (hit) applyPaintToPixel(hit.partIdx, hit.faceIdx, hit.px, hit.py, isEyedrop);
+    }
+
+    function attachCanvasControl(canvasId, redrawCallback) {
+        const cvs = document.getElementById(canvasId);
+        if (!cvs) return;
+        const is2D = (canvasId === 'canvas2D');
+        const isModelCanvas = (canvasId === 'canvas2D' || canvasId === 'canvas3DModel');
+
+        cvs.addEventListener('mousedown', e => {
+            if (isModelCanvas && canvasToolMode !== 'orbit') {
+                didEyedropper = false; clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => { handleCanvasAction(e.clientX, e.clientY, cvs, is2D, true); }, 400);
+                handleCanvasAction(e.clientX, e.clientY, cvs, is2D, false);
+                return;
+            }
+            if (!is2D) { isTouchDrag = true; lastPt = { x: e.clientX, y: e.clientY }; }
+        });
+
+        window.addEventListener('mouseup', () => { isTouchDrag = false; clearTimeout(longPressTimer); });
+
+        window.addEventListener('mousemove', e => {
+            if (isModelCanvas && canvasToolMode !== 'orbit' && e.buttons === 1) {
+                clearTimeout(longPressTimer);
+                if (!didEyedropper) handleCanvasAction(e.clientX, e.clientY, cvs, is2D, false);
+                return;
+            }
+            if (!isTouchDrag || is2D) return;
+            viewCam.yaw -= (e.clientX - lastPt.x) * 0.015;
+            viewCam.pitch = Math.max(-1.4, Math.min(1.4, viewCam.pitch + (e.clientY - lastPt.y) * 0.015));
+            lastPt = { x: e.clientX, y: e.clientY }; redrawCallback();
+        });
+
+        cvs.addEventListener('touchstart', e => {
+            if (e.touches.length === 1 && isModelCanvas && canvasToolMode !== 'orbit') {
+                e.preventDefault(); didEyedropper = false;
+                const t0 = e.touches.item(0); lastPt = { x: t0.clientX, y: t0.clientY };
+                clearTimeout(longPressTimer);
+                longPressTimer = setTimeout(() => { handleCanvasAction(t0.clientX, t0.clientY, cvs, is2D, true); }, 400);
+                handleCanvasAction(t0.clientX, t0.clientY, cvs, is2D, false);
+                return;
+            }
+            clearTimeout(longPressTimer);
+            if (e.touches.length === 1 && !is2D) { isTouchDrag = true; lastPt = { x: e.touches.item(0).clientX, y: e.touches.item(0).clientY }; }
+            else if (e.touches.length === 2 && !is2D) {
+                isTouchDrag = false;
+                lastPinchDist = Math.hypot(e.touches.item(0).clientX - e.touches.item(1).clientX, e.touches.item(0).clientY - e.touches.item(1).clientY);
+            }
+        }, { passive: false });
+
+        cvs.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isModelCanvas && canvasToolMode !== 'orbit') {
+                const t0 = e.touches.item(0);
+                if (Math.hypot(t0.clientX - lastPt.x, t0.clientY - lastPt.y) > 6) clearTimeout(longPressTimer);
+                if (!didEyedropper) handleCanvasAction(t0.clientX, t0.clientY, cvs, is2D, false);
+                return;
+            }
+            if (e.touches.length === 1 && isTouchDrag && !is2D) {
+                const tx = e.touches.item(0).clientX, ty = e.touches.item(0).clientY;
+                viewCam.yaw -= (tx - lastPt.x) * 0.018;
+                viewCam.pitch = Math.max(-1.4, Math.min(1.4, viewCam.pitch + (ty - lastPt.y) * 0.018));
+                lastPt = { x: tx, y: ty }; redrawCallback();
+            } else if (e.touches.length === 2 && !is2D) {
+                const dist = Math.hypot(e.touches.item(0).clientX - e.touches.item(1).clientX, e.touches.item(0).clientY - e.touches.item(1).clientY);
+                viewCam.zoom = Math.max(2.0, Math.min(18.0, viewCam.zoom + (dist - lastPinchDist) * 0.03));
+                lastPinchDist = dist; redrawCallback();
+            }
+        }, { passive: false });
+
+        cvs.addEventListener('touchend', () => { isTouchDrag = false; clearTimeout(longPressTimer); });
+    }
+    function project3D(x, y, z, cx, cy, scale) {
+        const yOff = y - 14;
+        const cosY = Math.cos(viewCam.yaw), sinY = Math.sin(viewCam.yaw);
+        const cosP = Math.cos(viewCam.pitch), sinP = Math.sin(viewCam.pitch);
+        const rx = x * cosY - z * sinY, rz = x * sinY + z * cosY;
+        const ry = yOff * cosP - rz * sinP;
+        const depth = yOff * sinP + rz * cosP + 60;
+        const factor = (scale * 55) / Math.max(10, depth);
+        return { sx: cx + rx * factor, sy: cy - ry * factor, depth: depth };
+    }
+
+    function rotatePoint3D(px, py, pz, pivX, pivY, pivZ, rotDeg) {
+        const deg = Math.PI / 180;
+        let dx = px - pivX, dy = py - pivY, dz = pz - pivZ;
+        const ax = -rotDeg.at(0) * deg;
+        let y1 = dy * Math.cos(ax) - dz * Math.sin(ax), z1 = dy * Math.sin(ax) + dz * Math.cos(ax);
+        dy = y1; dz = z1;
+        const ay = -rotDeg.at(1) * deg;
+        let x2 = dx * Math.cos(ay) + dz * Math.sin(ay), z2 = -dx * Math.sin(ay) + dz * Math.cos(ay);
+        dx = x2; dz = z2;
+        const az = rotDeg.at(2) * deg;
+        let x3 = dx * Math.cos(az) - dy * Math.sin(az), y3 = dx * Math.sin(az) + dy * Math.cos(az);
+        return vec3(pivX + x3, pivY + y3, pivZ + dz);
+    }
+
+    function render3DScene(canvasId, animTransforms) {
+        const cvs = document.getElementById(canvasId);
+        if (!cvs) return;
+        const rect = cvs.parentElement.getBoundingClientRect();
+        cvs.width = rect.width || 340; cvs.height = rect.height || 280;
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        ctx.fillStyle = '#101010'; ctx.fillRect(0, 0, w, h);
+
+        const cx = w / 2, cy = h / 2 + 10, sc = viewCam.zoom;
+        ctx.strokeStyle = '#253820'; ctx.lineWidth = 1;
+        for (let g = -16; g <= 16; g += 4) {
+            const p1 = project3D(g, 0, -16, cx, cy, sc), p2 = project3D(g, 0, 16, cx, cy, sc);
+            ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
+            const p3 = project3D(-16, 0, g, cx, cy, sc), p4 = project3D(16, 0, g, cx, cy, sc);
+            ctx.beginPath(); ctx.moveTo(p3.sx, p3.sy); ctx.lineTo(p4.sx, p4.sy); ctx.stroke();
+        }
+
+        const faceDefs = new Array(
+            new Array(0, 1, 2, 3), new Array(5, 4, 7, 6),
+            new Array(3, 2, 6, 7), new Array(4, 5, 1, 0),
+            new Array(4, 0, 3, 7), new Array(1, 5, 6, 2)
+        );
+        const allQuads = new Array();
+
+        builderParts.forEach((p, partIdx) => {
+            ensurePartPixels(p);
+            const tr = (animTransforms && animTransforms[p.bone]) ? animTransforms[p.bone] : { rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) };
+            const pivX = p.x + p.w / 2, pivY = p.y + p.h, pivZ = p.z + p.d / 2;
+            const corners = new Array(
+                vec3(p.x, p.y, p.z), vec3(p.x + p.w, p.y, p.z), vec3(p.x + p.w, p.y + p.h, p.z), vec3(p.x, p.y + p.h, p.z),
+                vec3(p.x, p.y, p.z + p.d), vec3(p.x + p.w, p.y, p.z + p.d), vec3(p.x + p.w, p.y + p.h, p.z + p.d), vec3(p.x, p.y + p.h, p.z + p.d)
+            );
+            const rotCorners = corners.map(c => {
+                const r = rotatePoint3D(c.at(0), c.at(1), c.at(2), pivX, pivY, pivZ, tr.rot);
+                return vec3(r.at(0) + tr.pos.at(0), r.at(1) + tr.pos.at(1), r.at(2) + tr.pos.at(2));
+            });
+
+            faceDefs.forEach((idxs, faceIdx) => {
+                const grid = p.pixels.at(faceIdx);
+                const rows = grid.length, cols = grid.at(0).length;
+                const vBL = rotCorners.at(idxs.at(0)), vBR = rotCorners.at(idxs.at(1));
+                const vTR = rotCorners.at(idxs.at(2)), vTL = rotCorners.at(idxs.at(3));
+                function lerpV(a, b, t) { return vec3(a.at(0) + (b.at(0) - a.at(0)) * t, a.at(1) + (b.at(1) - a.at(1)) * t, a.at(2) + (b.at(2) - a.at(2)) * t); }
+
+                for (let r = 0; r < rows; r++) {
+                    const t0 = 1 - r / rows, t1 = 1 - (r + 1) / rows;
+                    const left0 = lerpV(vBL, vTL, t0), right0 = lerpV(vBR, vTR, t0);
+                    const left1 = lerpV(vBL, vTL, t1), right1 = lerpV(vBR, vTR, t1);
+                    for (let c = 0; c < cols; c++) {
+                        const s0 = c / cols, s1 = (c + 1) / cols;
+                        const q0 = lerpV(left0, right0, s0), q1 = lerpV(left0, right0, s1);
+                        const q2 = lerpV(left1, right1, s1), q3 = lerpV(left1, right1, s0);
+                        const pts = new Array(
+                            project3D(q0.at(0), q0.at(1), q0.at(2), cx, cy, sc), project3D(q1.at(0), q1.at(1), q1.at(2), cx, cy, sc),
+                            project3D(q2.at(0), q2.at(1), q2.at(2), cx, cy, sc), project3D(q3.at(0), q3.at(1), q3.at(2), cx, cy, sc)
+                        );
+                        const avgDepth = (pts.at(0).depth + pts.at(1).depth + pts.at(2).depth + pts.at(3).depth) / 4;
+                        allQuads.push({ pts, avgDepth, color: grid.at(r).at(c), partIdx, faceIdx, px: c, py: r });
+                    }
+                }
+            });
+        });
+
+        allQuads.sort((a, b) => b.avgDepth - a.avgDepth);
+        if (canvasId === 'canvas3DModel') renderedFaces3D = allQuads;
+        allQuads.forEach(q => {
+            ctx.beginPath(); ctx.moveTo(q.pts.at(0).sx, q.pts.at(0).sy);
+            for (let i = 1; i < 4; i++) ctx.lineTo(q.pts.at(i).sx, q.pts.at(i).sy);
+            ctx.closePath(); ctx.fillStyle = q.color; ctx.fill();
+            ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 0.5; ctx.stroke();
+        });
+    }
+
+    function liveUpdateSelectedPart() {
+        const bone = document.getElementById('partBoneName').value.trim();
+        if (!bone) return;
+        const idx = builderParts.findIndex(p => p.bone === bone);
+        if (idx >= 0) {
+            const oldPixels = builderParts.at(idx).pixels;
+            builderParts[idx] = {
+                bone, color: document.getElementById('partColor').value || "#4299e1",
+                x: parseFloat(document.getElementById('partX').value) || 0, y: parseFloat(document.getElementById('partY').value) || 0, z: parseFloat(document.getElementById('partZ').value) || 0,
+                w: Math.max(1, parseFloat(document.getElementById('partW').value) || 1), h: Math.max(1, parseFloat(document.getElementById('partH').value) || 1), d: Math.max(1, parseFloat(document.getElementById('partD').value) || 1),
+                pixels: oldPixels
+            };
+            renderModelPartsTable(); refreshModelViews();
+        }
+    }
+
+    function switchModelEditMode(mode) {
+        document.getElementById('modelEditor2D').style.display = (mode === '2d') ? 'block' : 'none';
+        document.getElementById('modelEditor3D').style.display = (mode === '3d') ? 'block' : 'none';
+        document.getElementById('btnView2D').className = (mode === '2d') ? 'btn-play' : 'btn-small';
+        document.getElementById('btnView3D').className = (mode === '3d') ? 'btn-play' : 'btn-small';
+        refreshModelViews(); setTimeout(refreshModelViews, 60);
+    }
+
+    function refreshModelViews() { draw2DEditor(); render3DScene('canvas3DModel', null); render3DScene('canvas3DAnim', getCurrentAnimTransforms()); syncAnimBoneSelect(); }
+    function loadBuilderPreset(preset) {
+        if (preset === 'humanoid') {
+            builderParts = new Array(
+                { bone: "body", x: -4, y: 12, z: -2, w: 8, h: 12, d: 4, color: "#38a169" },
+                { bone: "head", x: -4, y: 24, z: -4, w: 8, h: 8, d: 8, color: "#ed8936" },
+                { bone: "rightArm", x: -8, y: 12, z: -2, w: 4, h: 12, d: 4, color: "#4299e1" },
+                { bone: "leftArm", x: 4, y: 12, z: -2, w: 4, h: 12, d: 4, color: "#4299e1" },
+                { bone: "rightLeg", x: -4, y: 0, z: -2, w: 4, h: 12, d: 4, color: "#2b6cb0" },
+                { bone: "leftLeg", x: 0, y: 0, z: -2, w: 4, h: 12, d: 4, color: "#2b6cb0" }
+            );
+        } else if (preset === 'quadruped') {
+            builderParts = new Array(
+                { bone: "body", x: -5, y: 6, z: -7, w: 10, h: 8, d: 14, color: "#805ad5" },
+                { bone: "head", x: -4, y: 8, z: -14, w: 8, h: 8, d: 8, color: "#ed8936" },
+                { bone: "leg0", x: -5, y: 0, z: 3, w: 4, h: 6, d: 4, color: "#2b6cb0" },
+                { bone: "leg1", x: 1, y: 0, z: 3, w: 4, h: 6, d: 4, color: "#2b6cb0" },
+                { bone: "leg2", x: -5, y: 0, z: -7, w: 4, h: 6, d: 4, color: "#4299e1" },
+                { bone: "leg3", x: 1, y: 0, z: -7, w: 4, h: 6, d: 4, color: "#4299e1" }
+            );
+        } else if (preset === 'sword') {
+            builderParts = new Array(
+                { bone: "handle", x: -1, y: 0, z: -1, w: 2, h: 6, d: 2, color: "#975a16" },
+                { bone: "guard", x: -3, y: 6, z: -1, w: 6, h: 2, d: 2, color: "#ecc94b" },
+                { bone: "blade", x: -1, y: 8, z: -1, w: 2, h: 14, d: 2, color: "#63b3ed" }
+            );
+        } else {
+            builderParts = new Array({ bone: "body", x: -4, y: 0, z: -4, w: 8, h: 8, d: 8, color: "#48bb78" });
+        }
+        renderModelPartsTable(); refreshModelViews();
+    }
+
+    function addOrUpdateModelPart() {
+        const bone = document.getElementById('partBoneName').value.trim() || "part";
+        const color = document.getElementById('partColor').value || "#4299e1";
+        const x = parseFloat(document.getElementById('partX').value) || 0, y = parseFloat(document.getElementById('partY').value) || 0, z = parseFloat(document.getElementById('partZ').value) || 0;
+        const w = Math.max(1, parseFloat(document.getElementById('partW').value) || 1), h = Math.max(1, parseFloat(document.getElementById('partH').value) || 1), d = Math.max(1, parseFloat(document.getElementById('partD').value) || 1);
+        const idx = builderParts.findIndex(p => p.bone === bone);
+        if (idx >= 0) builderParts[idx] = { bone, x, y, z, w, h, d, color };
+        else builderParts.push({ bone, x, y, z, w, h, d, color });
+        renderModelPartsTable(); refreshModelViews();
+    }
+
+    function selectPartForEdit(idx) {
+        const p = builderParts.at(idx);
+        if (!p) return;
+        document.getElementById('partBoneName').value = p.bone;
+        document.getElementById('partColor').value = p.color;
+        document.getElementById('partX').value = p.x; document.getElementById('partY').value = p.y; document.getElementById('partZ').value = p.z;
+        document.getElementById('partW').value = p.w; document.getElementById('partH').value = p.h; document.getElementById('partD').value = p.d;
+    }
+
+    function renderModelPartsTable() {
+        const tbody = document.getElementById('modelPartsTable');
+        tbody.innerHTML = '';
+        builderParts.forEach((p, i) => {
+            tbody.innerHTML += `<tr><td><strong>${p.bone}</strong></td><td>${p.x},${p.y},${p.z}</td><td>${p.w}×${p.h}×${p.d}</td><td><span style="display:inline-block;width:14px;height:14px;background:${p.color};border-radius:3px;"></span></td><td><button type="button" class="btn-small" style="padding:3px 7px;font-size:11px;" onclick="selectPartForEdit(${i})">選択</button> <button type="button" class="btn-danger" style="padding:3px 7px;font-size:11px;" onclick="builderParts.splice(${i},1); renderModelPartsTable(); refreshModelViews();">消</button></td></tr>`;
+        });
+    }
+
+    function exportPaintedModelAndTexture(geoId) {
+        let texW = 64, curX = 0, curY = 0, rowMaxH = 0;
+        const placements = new Array();
+
+        builderParts.forEach(p => {
+            ensurePartPixels(p);
+            const partFaces = new Array();
+            for (let f = 0; f < 6; f++) {
+                const grid = p.pixels.at(f);
+                const rows = grid.length, cols = grid.at(0).length;
+                if (curX + cols > texW) { curX = 0; curY += rowMaxH + 1; rowMaxH = 0; }
+                partFaces.push({ u: curX, v: curY, w: cols, h: rows, grid });
+                curX += cols + 1;
+                if (rows > rowMaxH) rowMaxH = rows;
+            }
+            placements.push(partFaces);
+        });
+
+        let texH = 64;
+        while (texH < curY + rowMaxH + 2) texH *= 2;
+        const canvas = document.createElement('canvas');
+        canvas.width = texW; canvas.height = texH;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, texW, texH);
+
+        placements.forEach(partFaces => {
+            partFaces.forEach(pf => {
+                for (let r = 0; r < pf.h; r++) {
+                    for (let c = 0; c < pf.w; c++) {
+                        ctx.fillStyle = pf.grid.at(r).at(c);
+                        ctx.fillRect(pf.u + c, pf.v + r, 1, 1);
+                    }
+                }
+            });
+        });
+
+        const faceKeys = new Array("north", "south", "up", "down", "east", "west");
+        const bones = builderParts.map((p, idx) => {
+            const pfList = placements.at(idx), uvObj = {};
+            faceKeys.forEach((key, fIdx) => { const pf = pfList.at(fIdx); uvObj[key] = { uv: vec2(pf.u, pf.v), uv_size: vec2(pf.w, pf.h) }; });
+            return { name: p.bone, pivot: vec3(p.x + p.w / 2, p.y + p.h, p.z + p.d / 2), cubes: new Array({ origin: vec3(p.x, p.y, p.z), size: vec3(p.w, p.h, p.d), uv: uvObj }) };
+        });
+
+        const geoJson = JSON.stringify({
+            format_version: "1.12.0",
+            "minecraft:geometry": new Array({ description: { identifier: geoId, texture_width: texW, texture_height: texH, visible_bounds_width: 3, visible_bounds_height: 3, visible_bounds_offset: vec3(0, 1.5, 0) }, bones })
+        }, null, 2);
+
+        return new Promise(resolve => { canvas.toBlob(blob => { blob.arrayBuffer().then(texBuf => resolve({ geoJson, texBuf })); }, 'image/png'); });
+    }
+
+    async function saveBuiltModelToPack() {
+        const mType = document.getElementById('builderModelType').value;
+        const id = document.getElementById('builderModelId').value.trim();
+        if (!id.includes(':')) { alert('識別IDは namespace:name 形式で入力してください'); return; }
+        const shortName = id.split(':').at(1).replace(/[^a-zA-Z0-9_]/g, '_');
+        const geoId = `geometry.${shortName}`;
+        const built = await exportPaintedModelAndTexture(geoId);
+        const texFile = document.getElementById('builderTexFile').files.item(0);
+        const finalTexBuf = texFile ? await texFile.arrayBuffer() : built.texBuf;
+
+        if (mType === 'mob') mobModels.push({ identifier: id, shortName, preset: "custom_2d3d", geoIdentifier: geoId, geoJson: built.geoJson, texBuffer: finalTexBuf, linked: false });
+        else itemModels.push({ identifier: id, shortName, preset: "custom_2d3d", geoIdentifier: geoId, geoJson: built.geoJson, texBuffer: finalTexBuf, linked: false });
+        document.getElementById('builderTexFile').value = '';
+        renderAllLists();
+        alert(`ドット絵テクスチャ付き3Dモデル (${id}) をパックに保存しました！`);
+    }
+    function confirmSetupAndSave() {
+        const type = document.getElementById('packType').value;
+        const name = document.getElementById('packName').value.trim() || "My Custom Pack";
+        const fmt = document.getElementById('fileFormat').value;
+
+        document.getElementById('wsPackTitle').textContent = name;
+        const labelMap = { addon: "アドオン (RP + BP)", resources: "リソースパック (RP)", data: "ビヘイビアパック (BP)" };
+        document.getElementById('wsPackBadge').textContent = `モード: ${labelMap[type]}`;
+        const ext = (fmt === 'zip') ? 'zip' : (type === 'addon' ? 'mcaddon' : 'mcpack');
+        document.getElementById('downloadBtn').textContent = `📦 .${ext} 出力`;
+
+        const switcher = document.getElementById('modeSwitcher');
+        if (type === 'addon') { switcher.style.display = 'flex'; switchEditorMode('both'); }
+        else if (type === 'resources') { switcher.style.display = 'none'; switchEditorMode('rp'); }
+        else { switcher.style.display = 'none'; switchEditorMode('bp'); }
+
+        document.getElementById('setupScreen').style.display = 'none';
+        document.getElementById('workspaceScreen').style.display = 'block';
+        updatePreview(); refreshModelViews();
+    }
+
+    function backToSetup() { document.getElementById('workspaceScreen').style.display = 'none'; document.getElementById('setupScreen').style.display = 'block'; }
+
+    function switchEditorMode(mode) {
+        document.getElementById('areaBoth').style.display = (mode === 'both') ? 'block' : 'none';
+        document.getElementById('areaRp').style.display = (mode === 'rp') ? 'block' : 'none';
+        document.getElementById('areaBp').style.display = (mode === 'bp') ? 'block' : 'none';
+        document.getElementById('btnModeBoth').className = 'mode-btn' + (mode === 'both' ? ' active-both' : '');
+        document.getElementById('btnModeRp').className = 'mode-btn' + (mode === 'rp' ? ' active-rp' : '');
+        document.getElementById('btnModeBp').className = 'mode-btn' + (mode === 'bp' ? ' active-bp' : '');
+        if (mode === 'rp') refreshModelViews();
+    }
+
+        let item2dGrid = new Array(), item2dSize = 16, item2dTool = 'pen';
+    let item2dStartPt = null, item2dLongTimer = null, item2dDidDrop = false;
+    let rp2dItems = new Array(), savedParticles = new Array();
+
+    function switchSubTab(group, tab) {
+        if (group === 'rp') {
+            document.getElementById('rpViewModel').style.display = (tab === 'model') ? 'block' : 'none';
+            document.getElementById('rpViewItem2D').style.display = (tab === 'item2d') ? 'block' : 'none';
+            document.getElementById('rpViewAnim').style.display = (tab === 'anim') ? 'block' : 'none';
+            document.getElementById('rpViewParticle').style.display = (tab === 'particle') ? 'block' : 'none';
+            document.getElementById('tabRpModel').className = 'tab-btn' + (tab === 'model' ? ' active' : '');
+            document.getElementById('tabRpItem2D').className = 'tab-btn' + (tab === 'item2d' ? ' active' : '');
+            document.getElementById('tabRpAnim').className = 'tab-btn' + (tab === 'anim' ? ' active' : '');
+            document.getElementById('tabRpParticle').className = 'tab-btn' + (tab === 'particle' ? ' active' : '');
+            if (tab === 'item2d') drawItem2DCanvas();
+            else refreshModelViews();
+        } else {
+            document.getElementById('bpViewScript').style.display = (tab === 'script') ? 'block' : 'none';
+            document.getElementById('bpViewData').style.display = (tab === 'data') ? 'block' : 'none';
+            document.getElementById('tabBpScript').className = 'tab-btn' + (tab === 'script' ? ' active' : '');
+            document.getElementById('tabBpData').className = 'tab-btn' + (tab === 'data' ? ' active' : '');
+        }
+    }
+
+    function setItem2DTool(t) {
+        item2dTool = t;
+        const map = { pen: 'i2dToolPen', fill: 'i2dToolFill', line: 'i2dToolLine', circle: 'i2dToolCircle', erase: 'i2dToolErase' };
+        Object.keys(map).forEach(k => { const b = document.getElementById(map[k]); if (b) b.className = (k === t) ? 'btn-play' : 'btn-small'; });
+    }
+
+    function initItem2DGrid() {
+        const sel = document.getElementById('item2dRes');
+        item2dSize = sel ? (parseInt(sel.value, 10) || 16) : 16;
+        item2dGrid = new Array();
+        for (let r = 0; r < item2dSize; r++) {
+            const row = new Array();
+            for (let c = 0; c < item2dSize; c++) row.push(null);
+            item2dGrid.push(row);
+        }
+        drawItem2DCanvas();
+    }
+
+    function clearItem2DCanvas() { initItem2DGrid(); }
+
+    function drawItem2DCanvas(previewOverlay) {
+        const cvs = document.getElementById('canvasItem2D');
+        if (!cvs) return;
+        const rect = cvs.parentElement.getBoundingClientRect();
+        const sizePx = Math.min(rect.width || 280, rect.height || 280);
+        cvs.width = sizePx; cvs.height = sizePx;
+        const ctx = cvs.getContext('2d');
+        const cell = sizePx / item2dSize;
+        for (let r = 0; r < item2dSize; r++) {
+            for (let c = 0; c < item2dSize; c++) {
+                ctx.fillStyle = ((r + c) % 2 === 0) ? '#222222' : '#2d2d2d';
+                ctx.fillRect(c * cell, r * cell, cell, cell);
+                const col = (previewOverlay && previewOverlay.at(r) && previewOverlay.at(r).at(c) !== undefined) ? previewOverlay.at(r).at(c) : (item2dGrid.at(r) ? item2dGrid.at(r).at(c) : null);
+                if (col) { ctx.fillStyle = col; ctx.fillRect(c * cell, r * cell, cell, cell); }
+                ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 0.5; ctx.strokeRect(c * cell, r * cell, cell, cell);
+            }
+        }
+    }
+    function getItem2DCell(clientX, clientY, cvs) {
+        const rect = cvs.getBoundingClientRect();
+        const x = (clientX - rect.left) * (cvs.width / rect.width);
+        const y = (clientY - rect.top) * (cvs.height / rect.height);
+        const cell = cvs.width / item2dSize;
+        const c = Math.floor(x / cell), r = Math.floor(y / cell);
+        if (r < 0 || r >= item2dSize || c < 0 || c >= item2dSize) return null;
+        return { r, c };
+    }
+
+    function floodFillItem2D(sr, sc, fillCol) {
+        const targetCol = item2dGrid.at(sr).at(sc);
+        if (targetCol === fillCol) return;
+        const stack = new Array(vec2(sr, sc));
+        while (stack.length > 0) {
+            const pt = stack.pop();
+            const r = pt.at(0), c = pt.at(1);
+            if (r < 0 || r >= item2dSize || c < 0 || c >= item2dSize) continue;
+            if (item2dGrid.at(r).at(c) !== targetCol) continue;
+            item2dGrid.at(r).splice(c, 1, fillCol);
+            stack.push(vec2(r - 1, c), vec2(r + 1, c), vec2(r, c - 1), vec2(r, c + 1));
+        }
+    }
+
+    function computeShapeCells(r0, c0, r1, c1, mode) {
+        const pts = new Array();
+        if (mode === 'line') {
+            let dr = Math.abs(r1 - r0), dc = Math.abs(c1 - c0);
+            let sr = (r0 < r1) ? 1 : -1, sc = (c0 < c1) ? 1 : -1;
+            let err = dc - dr, cr = r0, cc = c0;
+            while (true) {
+                pts.push(vec2(cr, cc));
+                if (cr === r1 && cc === c1) break;
+                const e2 = 2 * err;
+                if (e2 > -dr) { err -= dr; cc += sc; }
+                if (e2 < dc) { err += dc; cr += sr; }
+            }
+        } else if (mode === 'circle') {
+            const radius = Math.round(Math.hypot(r1 - r0, c1 - c0));
+            for (let r = 0; r < item2dSize; r++) {
+                for (let c = 0; c < item2dSize; c++) {
+                    const d = Math.round(Math.hypot(r - r0, c - c0));
+                    if (d === radius) pts.push(vec2(r, c));
+                }
+            }
+        }
+        return pts;
+    }
+
+    function setupItem2DCanvasEvents() {
+        const cvs = document.getElementById('canvasItem2D');
+        if (!cvs) return;
+        let drawing = false;
+
+        function onStart(cx, cy) {
+            const cell = getItem2DCell(cx, cy, cvs);
+            if (!cell) return;
+            drawing = true; item2dDidDrop = false; item2dStartPt = cell;
+            clearTimeout(item2dLongTimer);
+            item2dLongTimer = setTimeout(() => {
+                const picked = item2dGrid.at(cell.r).at(cell.c);
+                if (picked) {
+                    document.getElementById('item2dColor').value = picked;
+                    item2dDidDrop = true;
+                    if (navigator.vibrate) navigator.vibrate(40);
+                    const t = document.getElementById('item2dToast');
+                    if (t) t.textContent = `💧 スポイト: ${picked}`;
+                }
+            }, 400);
+
+            const col = (item2dTool === 'erase') ? null : document.getElementById('item2dColor').value;
+            if (item2dTool === 'pen' || item2dTool === 'erase') {
+                item2dGrid.at(cell.r).splice(cell.c, 1, col);
+                drawItem2DCanvas();
+            } else if (item2dTool === 'fill') {
+                floodFillItem2D(cell.r, cell.c, col);
+                drawItem2DCanvas();
+            }
+        }
+
+        function onMove(cx, cy) {
+            if (!drawing || item2dDidDrop) return;
+            const cell = getItem2DCell(cx, cy, cvs);
+            if (!cell) return;
+            if (cell.r !== item2dStartPt.r || cell.c !== item2dStartPt.c) clearTimeout(item2dLongTimer);
+            const col = (item2dTool === 'erase') ? null : document.getElementById('item2dColor').value;
+            if (item2dTool === 'pen' || item2dTool === 'erase') {
+                item2dGrid.at(cell.r).splice(cell.c, 1, col);
+                drawItem2DCanvas();
+            } else if (item2dTool === 'line' || item2dTool === 'circle') {
+                const temp = item2dGrid.map(row => [...row]);
+                computeShapeCells(item2dStartPt.r, item2dStartPt.c, cell.r, cell.c, item2dTool).forEach(pt => temp.at(pt.at(0)).splice(pt.at(1), 1, col));
+                drawItem2DCanvas(temp);
+            }
+        }
+
+        function onEnd(cx, cy) {
+            clearTimeout(item2dLongTimer);
+            if (drawing && !item2dDidDrop && (item2dTool === 'line' || item2dTool === 'circle') && item2dStartPt) {
+                const cell = (cx !== null) ? getItem2DCell(cx, cy, cvs) : item2dStartPt;
+                const col = document.getElementById('item2dColor').value;
+                if (cell) computeShapeCells(item2dStartPt.r, item2dStartPt.c, cell.r, cell.c, item2dTool).forEach(pt => item2dGrid.at(pt.at(0)).splice(pt.at(1), 1, col));
+                drawItem2DCanvas();
+            }
+            drawing = false; item2dStartPt = null;
+        }
+
+        cvs.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
+        window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', e => onEnd(e.clientX, e.clientY));
+        cvs.addEventListener('touchstart', e => { if (e.touches.length === 1) { e.preventDefault(); onStart(e.touches.item(0).clientX, e.touches.item(0).clientY); } }, { passive: false });
+        cvs.addEventListener('touchmove', e => { if (e.touches.length === 1) { e.preventDefault(); onMove(e.touches.item(0).clientX, e.touches.item(0).clientY); } }, { passive: false });
+        cvs.addEventListener('touchend', e => { const t = e.changedTouches.item(0); onEnd(t ? t.clientX : null, t ? t.clientY : null); });
+    }
+    async function saveItem2DToPack() {
+        const id = document.getElementById('item2dId').value.trim();
+        const name = document.getElementById('item2dName').value.trim() || id;
+        const dmg = parseInt(document.getElementById('item2dDamage').value, 10) || 5;
+        const stack = parseInt(document.getElementById('item2dStack').value, 10) || 1;
+        const linkBp = document.getElementById('item2dLinkBp').checked;
+        if (!id.includes(':')) { alert('IDは namespace:name 形式で入力してください'); return; }
+        const shortName = id.split(':').at(1).replace(/[^a-zA-Z0-9_]/g, '_');
+
+        const cvs = document.createElement('canvas');
+        cvs.width = item2dSize; cvs.height = item2dSize;
+        const ctx = cvs.getContext('2d');
+        ctx.clearRect(0, 0, item2dSize, item2dSize);
+        for (let r = 0; r < item2dSize; r++) {
+            for (let c = 0; c < item2dSize; c++) {
+                const col = item2dGrid.at(r).at(c);
+                if (col) { ctx.fillStyle = col; ctx.fillRect(c, r, 1, 1); }
+            }
+        }
+        const texBuf = await new Promise(res => cvs.toBlob(b => b.arrayBuffer().then(res), 'image/png'));
+        rp2dItems.push({ identifier: id, shortName, displayName: name, texBuffer: texBuf });
+
+        if (linkBp) {
+            bpItems.push({ identifier: id, shortName, displayName: name, damage: dmg, maxStack: stack, texShort: shortName, linked: false });
+        }
+        renderItem2DList();
+        renderAllLists();
+        alert(`2Dアイテム (${name}) をパックに追加しました！`);
+    }
+
+    function renderItem2DList() {
+        const el = document.getElementById('savedItem2DList');
+        if (!el) return;
+        el.innerHTML = '';
+        rp2dItems.forEach((it, i) => {
+            el.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#d53f8c;">2D ITEM</span><strong>${it.displayName}</strong> (${it.identifier})</div><button type="button" class="btn-danger" onclick="rp2dItems.splice(${i},1); renderItem2DList();">削除</button></div>`;
+        });
+    }
+
+    async function addParticlesToPack() {
+        const jInput = document.getElementById('particleJsonFiles');
+        const tInput = document.getElementById('particleTexFiles');
+        const autoFix = document.getElementById('autoFixParticlePath').checked;
+        const jFiles = jInput ? Array.from(jInput.files) : new Array();
+        const tFiles = tInput ? Array.from(tInput.files) : new Array();
+        if (jFiles.length === 0 && tFiles.length === 0) { alert('パーティクルのJSONまたはPNGファイルを選択してください'); return; }
+
+        const texBuffers = new Array();
+        for (const tf of tFiles) texBuffers.push({ name: tf.name, buf: await tf.arrayBuffer() });
+
+        const jsonTexts = new Array();
+        for (const jf of jFiles) {
+            let txt = await jf.text();
+            if (autoFix && tFiles.length > 0) {
+                try {
+                    const p = JSON.parse(txt); const br = p?.particle_effect?.description?.basic_render_parameters;
+                    if (br) {
+                        const target = (tFiles.length === 1) ? tFiles.at(0) : tFiles.find(t => t.name.replace(/\.png$/i, '') === (br.texture || '').split('/').pop().replace(/\.png$/i, ''));
+                        if (target) { br.texture = `textures/particle/${target.name.replace(/\.png$/i, '')}`; txt = JSON.stringify(p, null, 2); }
+                    }
+                } catch (e) {}
+            }
+            jsonTexts.push({ name: jf.name, text: txt });
+        }
+
+        savedParticles.push({ label: jFiles.map(f => f.name).join(', ') || tFiles.map(f => f.name).join(', '), jsonTexts, texBuffers });
+        jInput.value = ''; tInput.value = ''; updateParticleFileList();
+        const listEl = document.getElementById('savedParticlesList');
+        if (listEl) {
+            listEl.innerHTML = '';
+            savedParticles.forEach((sp, i) => {
+                listEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#805ad5;">PARTICLE</span><strong>${sp.label}</strong></div><button type="button" class="btn-danger" onclick="savedParticles.splice(${i},1); this.parentElement.remove();">削除</button></div>`;
+            });
+        }
+        alert('パーティクルをパックに追加しました！');
+    }
+
+    let isPlayingAnim = false, currentAnimTime = 0, lastAnimTs = 0;
+
+    function syncAnimBoneSelect() {
+        const sel = document.getElementById('kfBone');
+        if (!sel) return;
+        const prev = sel.value; sel.innerHTML = '';
+        builderParts.forEach(p => { const opt = document.createElement('option'); opt.value = p.bone; opt.textContent = p.bone; sel.appendChild(opt); });
+        if (prev && builderParts.some(p => p.bone === prev)) sel.value = prev;
+    }
+
+    function getCurrentAnimTransforms() {
+        const result = {}, t = currentAnimTime;
+        builderParts.forEach(p => {
+            const kfs = currentKeyframes.filter(k => k.bone === p.bone).sort((a, b) => a.time - b.time);
+            if (kfs.length === 0) return;
+            let rot = vec3(0, 0, 0), pos = vec3(0, 0, 0);
+            if (t <= kfs.at(0).time) { rot = [...kfs.at(0).rot]; pos = [...kfs.at(0).pos]; }
+            else if (t >= kfs.at(-1).time) { rot = [...kfs.at(-1).rot]; pos = [...kfs.at(-1).pos]; }
+            else {
+                for (let i = 0; i < kfs.length - 1; i++) {
+                    if (t >= kfs.at(i).time && t <= kfs.at(i + 1).time) {
+                        const span = kfs.at(i + 1).time - kfs.at(i).time;
+                        const r = span > 0 ? (t - kfs.at(i).time) / span : 0;
+                        for (let ax = 0; ax < 3; ax++) {
+                            rot[ax] = kfs.at(i).rot[ax] + (kfs.at(i + 1).rot[ax] - kfs.at(i).rot[ax]) * r;
+                            pos[ax] = kfs.at(i).pos[ax] + (kfs.at(i + 1).pos[ax] - kfs.at(i).pos[ax]) * r;
+                        }
+                        break;
+                    }
+                }
+            }
+            result[p.bone] = { rot, pos };
+        });
+        return result;
+    }
+
+    function animLoop(ts) {
+        if (!lastAnimTs) lastAnimTs = ts;
+        const dt = (ts - lastAnimTs) / 1000; lastAnimTs = ts;
+        if (isPlayingAnim) {
+            const maxLen = parseFloat(document.getElementById('animLength').value) || 1.0;
+            const loopMode = document.getElementById('animLoop').value;
+            currentAnimTime += dt;
+            if (currentAnimTime >= maxLen) {
+                if (loopMode === 'true') currentAnimTime %= maxLen;
+                else { currentAnimTime = maxLen; isPlayingAnim = false; document.getElementById('playPauseBtn').textContent = '▶ 再生'; }
+            }
+            document.getElementById('timeSlider').value = currentAnimTime.toFixed(2);
+            document.getElementById('timeDisplay').textContent = `${currentAnimTime.toFixed(2)} / ${maxLen.toFixed(2)}s`;
+            render3DScene('canvas3DAnim', getCurrentAnimTransforms());
+        }
+        requestAnimationFrame(animLoop);
+    }
+
+    function togglePlayAnim() {
+        isPlayingAnim = !isPlayingAnim;
+        const maxLen = parseFloat(document.getElementById('animLength').value) || 1.0;
+        if (isPlayingAnim && currentAnimTime >= maxLen) currentAnimTime = 0;
+        document.getElementById('playPauseBtn').textContent = isPlayingAnim ? '❚❚ 一時停止' : '▶ 再生';
+    }
+
+    function stopAnim() {
+        isPlayingAnim = false; currentAnimTime = 0; document.getElementById('playPauseBtn').textContent = '▶ 再生'; document.getElementById('timeSlider').value = 0;
+        const maxLen = parseFloat(document.getElementById('animLength').value) || 1.0;
+        document.getElementById('timeDisplay').textContent = `0.00 / ${maxLen.toFixed(2)}s`;
+        render3DScene('canvas3DAnim', getCurrentAnimTransforms());
+    }
+
+    function scrubAnim(val) {
+        isPlayingAnim = false; document.getElementById('playPauseBtn').textContent = '▶ 再生'; currentAnimTime = parseFloat(val) || 0;
+        const maxLen = parseFloat(document.getElementById('animLength').value) || 1.0;
+        document.getElementById('timeDisplay').textContent = `${currentAnimTime.toFixed(2)} / ${maxLen.toFixed(2)}s`;
+        render3DScene('canvas3DAnim', getCurrentAnimTransforms());
+    }
+
+    function updateAnimDuration() {
+        const maxLen = parseFloat(document.getElementById('animLength').value) || 1.0;
+        document.getElementById('timeSlider').max = maxLen;
+        if (currentAnimTime > maxLen) currentAnimTime = maxLen;
+        document.getElementById('timeDisplay').textContent = `${currentAnimTime.toFixed(2)} / ${maxLen.toFixed(2)}s`;
+    }
+    function addOrUpdateKeyframe() {
+        const bone = document.getElementById('kfBone').value;
+        const time = Math.round((parseFloat(document.getElementById('kfTime').value) || 0) * 100) / 100;
+        const rot = vec3(parseFloat(document.getElementById('kfRotX').value) || 0, parseFloat(document.getElementById('kfRotY').value) || 0, parseFloat(document.getElementById('kfRotZ').value) || 0);
+        const pos = vec3(parseFloat(document.getElementById('kfPosX').value) || 0, parseFloat(document.getElementById('kfPosY').value) || 0, parseFloat(document.getElementById('kfPosZ').value) || 0);
+        const idx = currentKeyframes.findIndex(k => k.bone === bone && k.time === time);
+        if (idx >= 0) currentKeyframes[idx] = { bone, time, rot, pos };
+        else currentKeyframes.push({ bone, time, rot, pos });
+        renderKeyframeTable(); scrubAnim(time);
+    }
+
+    function removeKeyframe(idx) { currentKeyframes.splice(idx, 1); renderKeyframeTable(); render3DScene('canvas3DAnim', getCurrentAnimTransforms()); }
+
+    function renderKeyframeTable() {
+        const tbody = document.getElementById('kfTableBody'); tbody.innerHTML = '';
+        currentKeyframes.sort((a, b) => a.time - b.time || a.bone.localeCompare(b.bone));
+        currentKeyframes.forEach((kf, i) => {
+            tbody.innerHTML += `<tr><td><strong>${kf.bone}</strong></td><td>${kf.time.toFixed(2)}s</td><td>[${kf.rot.join(',')}]</td><td>[${kf.pos.join(',')}]</td><td><button type="button" class="btn-danger" onclick="removeKeyframe(${i})">削除</button></td></tr>`;
+        });
+    }
+
+    function loadSampleWalkAnim() {
+        document.getElementById('animId').value = "animation.custom.walk";
+        document.getElementById('animLength').value = "1.0";
+        document.getElementById('animLoop').value = "true";
+        if (!builderParts.some(p => p.bone === 'rightLeg')) loadBuilderPreset('humanoid');
+        updateAnimDuration();
+        currentKeyframes = new Array(
+            { bone: "rightLeg", time: 0.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) }, { bone: "rightLeg", time: 0.25, rot: vec3(40, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "rightLeg", time: 0.75, rot: vec3(-40, 0, 0), pos: vec3(0, 0, 0) }, { bone: "rightLeg", time: 1.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "leftLeg", time: 0.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) }, { bone: "leftLeg", time: 0.25, rot: vec3(-40, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "leftLeg", time: 0.75, rot: vec3(40, 0, 0), pos: vec3(0, 0, 0) }, { bone: "leftLeg", time: 1.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "rightArm", time: 0.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) }, { bone: "rightArm", time: 0.25, rot: vec3(-30, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "rightArm", time: 0.75, rot: vec3(30, 0, 0), pos: vec3(0, 0, 0) }, { bone: "rightArm", time: 1.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "leftArm", time: 0.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) }, { bone: "leftArm", time: 0.25, rot: vec3(30, 0, 0), pos: vec3(0, 0, 0) },
+            { bone: "leftArm", time: 0.75, rot: vec3(-30, 0, 0), pos: vec3(0, 0, 0) }, { bone: "leftArm", time: 1.0, rot: vec3(0, 0, 0), pos: vec3(0, 0, 0) }
+        );
+        renderKeyframeTable(); stopAnim();
+    }
+
+    function saveAnimationToPack() {
+        const animId = document.getElementById('animId').value.trim();
+        if (!animId) { alert('アニメーションIDを入力してください'); return; }
+        const length = parseFloat(document.getElementById('animLength').value) || 1.0;
+        const loopVal = document.getElementById('animLoop').value;
+        const loopSetting = loopVal === 'true' ? true : (loopVal === 'false' ? false : "hold_on_last_frame");
+        const bonesObj = {};
+        currentKeyframes.forEach(kf => {
+            if (!bonesObj[kf.bone]) bonesObj[kf.bone] = {};
+            const timeKey = kf.time.toFixed(2);
+            if (kf.rot.some(v => v !== 0) || kf.time === 0) { if (!bonesObj[kf.bone].rotation) bonesObj[kf.bone].rotation = {}; bonesObj[kf.bone].rotation[timeKey] = [...kf.rot]; }
+            if (kf.pos.some(v => v !== 0)) { if (!bonesObj[kf.bone].position) bonesObj[kf.bone].position = {}; bonesObj[kf.bone].position[timeKey] = [...kf.pos]; }
+        });
+        const animJson = { format_version: "1.8.0", animations: { [animId]: { loop: loopSetting, animation_length: length, bones: bonesObj } } };
+        const shortName = animId.split('.').pop().replace(/[^a-zA-Z0-9_]/g, '_') || 'custom_anim';
+        savedAnimations.push({ id: animId, fileName: `${shortName}.animation.json`, length, jsonContent: JSON.stringify(animJson, null, 2) });
+        const container = document.getElementById('savedAnimList'); container.innerHTML = '';
+        savedAnimations.forEach((a, i) => {
+            container.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#d69e2e; color:#111;">ANIM</span><strong>${a.id}</strong> (${a.length}s)</div><button type="button" class="btn-danger" onclick="savedAnimations.splice(${i},1); this.parentElement.remove();">削除</button></div>`;
+        });
+    }
+    async function addLinkedItem() {
+        const id = document.getElementById('bothItemId').value.trim();
+        const name = document.getElementById('bothItemName').value.trim() || id;
+        const dmg = parseInt(document.getElementById('bothItemDamage').value, 10) || 5;
+        const preset = document.getElementById('bothItemPreset').value;
+        const texFile = document.getElementById('bothItemTex').files.item(0);
+        const geoFile = document.getElementById('bothItemGeo').files.item(0);
+        if (!id.includes(':')) { alert('IDは namespace:name 形式で入力してください'); return; }
+        const shortName = id.split(':').at(1).replace(/[^a-zA-Z0-9_]/g, '_');
+        const geoId = `geometry.${shortName}`;
+        const prevParts = [...builderParts];
+        if (!geoFile) loadBuilderPreset(preset === 'sword' ? 'sword' : 'empty');
+        const built = await exportPaintedModelAndTexture(geoId);
+        const geoJson = geoFile ? await geoFile.text() : built.geoJson;
+        builderParts = prevParts; refreshModelViews();
+        const texBuf = texFile ? await texFile.arrayBuffer() : built.texBuf;
+        itemModels.push({ identifier: id, shortName, preset, geoIdentifier: geoId, geoJson, texBuffer: texBuf, linked: true });
+        bpItems.push({ identifier: id, shortName, displayName: name, damage: dmg, linked: true });
+        renderAllLists();
+    }
+
+    async function addLinkedMob() {
+        const id = document.getElementById('bothMobId').value.trim();
+        const name = document.getElementById('bothMobName').value.trim() || id;
+        const hp = parseInt(document.getElementById('bothMobHealth').value, 10) || 20;
+        const preset = document.getElementById('bothMobPreset').value;
+        const texFile = document.getElementById('bothMobTex').files.item(0);
+        const geoFile = document.getElementById('bothMobGeo').files.item(0);
+        if (!id.includes(':')) { alert('IDは namespace:name 形式で入力してください'); return; }
+        const shortName = id.split(':').at(1).replace(/[^a-zA-Z0-9_]/g, '_');
+        const geoId = `geometry.${shortName}`;
+        const prevParts = [...builderParts];
+        if (!geoFile) loadBuilderPreset(preset);
+        const built = await exportPaintedModelAndTexture(geoId);
+        const geoJson = geoFile ? await geoFile.text() : built.geoJson;
+        builderParts = prevParts; refreshModelViews();
+        const texBuf = texFile ? await texFile.arrayBuffer() : built.texBuf;
+        mobModels.push({ identifier: id, shortName, preset, geoIdentifier: geoId, geoJson, texBuffer: texBuf, linked: true });
+        bpMobs.push({ identifier: id, shortName, displayName: name, health: hp, linked: true });
+        renderAllLists();
+    }
+
+    function addBpOnlyData() {
+        const dType = document.getElementById('bpOnlyType').value, id = document.getElementById('bpOnlyId').value.trim();
+        const name = document.getElementById('bpOnlyName').value.trim() || id, val = parseInt(document.getElementById('bpOnlyVal').value, 10) || 10;
+        if (!id.includes(':')) { alert('IDは namespace:name 形式で入力してください'); return; }
+        const shortName = id.split(':').at(1).replace(/[^a-zA-Z0-9_]/g, '_');
+        if (dType === 'item') bpItems.push({ identifier: id, shortName, displayName: name, damage: val, linked: false });
+        else bpMobs.push({ identifier: id, shortName, displayName: name, health: val, linked: false });
+        renderAllLists();
+    }
+
+    function renderAllLists() {
+        const bItemEl = document.getElementById('bothItemsList'); bItemEl.innerHTML = '';
+        bpItems.filter(x => x.linked).forEach(it => { bItemEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#2f855a;">RP+BP</span><strong>${it.displayName}</strong> (${it.identifier})</div><button type="button" class="btn-danger" onclick="itemModels=itemModels.filter(x=>x.identifier!=='${it.identifier}'); bpItems=bpItems.filter(x=>x.identifier!=='${it.identifier}'); renderAllLists();">削除</button></div>`; });
+        const bMobEl = document.getElementById('bothMobsList'); bMobEl.innerHTML = '';
+        bpMobs.filter(x => x.linked).forEach(m => { bMobEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#2f855a;">RP+BP</span><strong>${m.displayName}</strong> (${m.identifier})</div><button type="button" class="btn-danger" onclick="mobModels=mobModels.filter(x=>x.identifier!=='${m.identifier}'); bpMobs=bpMobs.filter(x=>x.identifier!=='${m.identifier}'); renderAllLists();">削除</button></div>`; });
+        const rpEl = document.getElementById('rpModelsList'); rpEl.innerHTML = '';
+        mobModels.forEach((m, i) => { rpEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#2b6cb0;">MOB 3D</span><strong>${m.identifier}</strong></div><button type="button" class="btn-danger" onclick="mobModels.splice(${i},1); renderAllLists();">削除</button></div>`; });
+        itemModels.forEach((it, i) => { rpEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#319795;">ITEM 3D</span><strong>${it.identifier}</strong></div><button type="button" class="btn-danger" onclick="itemModels.splice(${i},1); renderAllLists();">削除</button></div>`; });
+        const bpEl = document.getElementById('bpDataList'); bpEl.innerHTML = '';
+        bpItems.forEach((it, i) => { bpEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#b7791f;">BP ITEM</span><strong>${it.displayName}</strong> (${it.identifier})</div><button type="button" class="btn-danger" onclick="bpItems.splice(${i},1); renderAllLists();">削除</button></div>`; });
+        bpMobs.forEach((m, i) => { bpEl.innerHTML += `<div class="added-card"><div><span class="badge" style="background:#c05621;">BP MOB</span><strong>${m.displayName}</strong> (${m.identifier})</div><button type="button" class="btn-danger" onclick="bpMobs.splice(${i},1); renderAllLists();">削除</button></div>`; });
+    }
+    function initScriptUI() {
+        const container = document.getElementById('scriptModulesList'); container.innerHTML = '';
+        SCRIPT_MODULES.forEach(mod => {
+            container.innerHTML += `<div class="script-item"><label style="margin:0; font-weight:normal; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="chk_${mod.id}" onchange="syncImportsWithCheckboxes(); updatePreview();"><span><strong>${mod.name}</strong> <small style="color:#aaa;">${mod.desc}</small></span></label><input type="text" id="ver_${mod.id}" value="${mod.defaultVer}" style="width:120px; padding:6px;" oninput="updatePreview()"></div>`;
+        });
+    }
+
+    function toggleAllScripts(state) {
+        SCRIPT_MODULES.forEach(mod => { const c = document.getElementById(`chk_${mod.id}`); if (c) c.checked = state; });
+        syncImportsWithCheckboxes(); updatePreview();
+    }
+
+    function updateParticleFileList() {
+        document.getElementById('particleJsonList').textContent = Array.from(document.getElementById('particleJsonFiles').files).map(f => `particles/${f.name}`).join(', ');
+        document.getElementById('particleTexList').textContent = Array.from(document.getElementById('particleTexFiles').files).map(f => `textures/particle/${f.name}`).join(', ');
+    }
+
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+    }
+
+    function regenerateUUIDs() { uuids = { rpHeader: generateUUID(), rpMod: generateUUID(), bpHeader: generateUUID(), bpMod: generateUUID() }; updatePreview(); }
+    function parseVersion(verStr) { const p = verStr.split('.').map(n => parseInt(n, 10) || 0); while (p.length < 3) p.push(0); return p.slice(0, 3); }
+
+    function getEnabledScripts() {
+        const enabled = new Array();
+        SCRIPT_MODULES.forEach(mod => { const c = document.getElementById(`chk_${mod.id}`); const v = document.getElementById(`ver_${mod.id}`); if (c && c.checked) enabled.push({ module_name: mod.name, version: v.value.trim() || mod.defaultVer }); });
+        return enabled;
+    }
+
+        function isRpBpDepEnabled() {
+        const chk = document.getElementById('linkRpBpDeps');
+        return chk ? chk.checked : true;
+    }
+
+    function buildResourceManifest(linkBp) {
+        const name = document.getElementById('packName').value || "Custom Pack";
+        const desc = document.getElementById('packDesc').value || "";
+        const minE = parseVersion(document.getElementById('minEngine').value);
+        const ver = parseVersion(document.getElementById('packVersion').value);
+        const useDep = linkBp && isRpBpDepEnabled();
+        const m = { format_version: 2, header: { name: linkBp ? `${name} (RP)` : name, description: desc, uuid: uuids.rpHeader, version: ver, min_engine_version: minE }, modules: new Array({ description: desc, type: "resources", uuid: uuids.rpMod, version: ver }) };
+        if (useDep) m.dependencies = new Array({ uuid: uuids.bpHeader, version: ver });
+        return m;
+    }
+
+    function buildBehaviorManifest(linkRp) {
+        const name = document.getElementById('packName').value || "Custom Pack";
+        const desc = document.getElementById('packDesc').value || "";
+        const minE = parseVersion(document.getElementById('minEngine').value);
+        const ver = parseVersion(document.getElementById('packVersion').value);
+        const useDep = linkRp && isRpBpDepEnabled();
+        const m = { format_version: 2, header: { name: linkRp ? `${name} (BP)` : name, description: desc, uuid: uuids.bpHeader, version: ver, min_engine_version: minE }, modules: new Array({ description: desc, type: "data", uuid: uuids.bpMod, version: ver }) };
+        const deps = new Array();
+        if (useDep) deps.push({ uuid: uuids.rpHeader, version: ver });
+        const scripts = getEnabledScripts();
+        if (scripts.length > 0) {
+            const entry = document.getElementById('scriptEntry').value.trim() || "scripts/main.js";
+            m.modules.push({ description: "Script API", type: "script", language: "javascript", uuid: generateUUID(), version: ver, entry });
+            scripts.forEach(s => deps.push(s));
+        }
+        if (deps.length > 0) m.dependencies = deps;
+        return m;
+    }
+
+
+    function syncImportsWithCheckboxes() {
+        const editor = document.getElementById('jsEditor');
+        let lines = editor.value.split('\n').filter(l => !/^import\s+\*\s+as\s+\w+\s+from\s+["']@minecraft\/[^"']+["'];?\s*$/.test(l));
+        const imports = getEnabledScripts().map(s => `import * as ${s.module_name.replace('@minecraft/', '').replace('-', '_')} from "${s.module_name}";`);
+        lines.splice((lines.length > 0 && lines.at(0).startsWith('//')) ? 1 : 0, 0, ...imports);
+        editor.value = lines.join('\n');
+    }
+
+    function resetJsEditor() { document.getElementById('jsEditor').value = `// Minecraft Bedrock Script API\nconsole.warn("Addon script loaded!");\n`; syncImportsWithCheckboxes(); }
+
+    function updatePreview() {
+        const type = document.getElementById('packType').value;
+        let out = "";
+        if (type === 'addon') out = "=== RP manifest.json ===\n" + JSON.stringify(buildResourceManifest(true), null, 2) + "\n\n=== BP manifest.json ===\n" + JSON.stringify(buildBehaviorManifest(true), null, 2);
+        else if (type === 'resources') out = JSON.stringify(buildResourceManifest(false), null, 2);
+        else out = JSON.stringify(buildBehaviorManifest(false), null, 2);
+        document.getElementById('jsonPreview').textContent = out;
+    }
+    async function writeRpFiles(folder, manifest, packName) {
+        folder.file("manifest.json", JSON.stringify(manifest, null, 2));
+        folder.file("texts/ja_JP.lang", `pack.name=${manifest.header.name}\npack.description=${manifest.header.description}`);
+        savedAnimations.forEach(a => folder.file(`animations/${a.fileName}`, a.jsonContent));
+
+        const animMap = {}; const animList = new Array();
+        savedAnimations.forEach((a, idx) => { animMap[`anim_${idx}`] = a.id; animList.push(`anim_${idx}`); });
+
+        mobModels.forEach(m => {
+            folder.file(`models/entity/${m.shortName}.geo.json`, m.geoJson);
+            folder.file(`textures/entity/${m.shortName}.png`, m.texBuffer);
+            const desc = { identifier: m.identifier, materials: { default: "entity_alphatest" }, textures: { default: `textures/entity/${m.shortName}` }, geometry: { default: m.geoIdentifier }, render_controllers: new Array(`controller.render.${m.shortName}`), spawn_egg: { base_color: "#3c8527", overlay_color: "#ffffff" } };
+            if (animList.length > 0) { desc.animations = animMap; desc.scripts = { animate: animList }; }
+            folder.file(`entity/${m.shortName}.entity.json`, JSON.stringify({ format_version: "1.10.0", "minecraft:client_entity": { description: desc } }, null, 2));
+            folder.file(`render_controllers/${m.shortName}.render_controllers.json`, JSON.stringify({ format_version: "1.8.0", render_controllers: { [`controller.render.${m.shortName}`]: { geometry: "Geometry.default", materials: new Array({ "*": "Material.default" }), textures: new Array("Texture.default") } } }, null, 2));
+        });
+
+        if (itemModels.length > 0) {
+            const texJson = { resource_pack_name: packName, texture_name: "atlas.items", texture_data: {} };
+            itemModels.forEach(it => {
+                folder.file(`models/entity/${it.shortName}.geo.json`, it.geoJson);
+                folder.file(`textures/entity/${it.shortName}.png`, it.texBuffer);
+                folder.file(`textures/items/${it.shortName}.png`, it.texBuffer);
+                texJson.texture_data[it.shortName] = { textures: `textures/items/${it.shortName}` };
+                folder.file(`attachables/${it.shortName}.json`, JSON.stringify({ format_version: "1.10.0", "minecraft:attachable": { description: { identifier: it.identifier, materials: { default: "entity_alphatest", enchanted: "entity_alphatest_glint" }, textures: { default: `textures/entity/${it.shortName}`, enchanted: "textures/misc/enchanted_item_glint" }, geometry: { default: it.geoIdentifier }, render_controllers: new Array("controller.render.item_default") } } }, null, 2));
+            });
+            folder.file("textures/item_texture.json", JSON.stringify(texJson, null, 2));
+        }
+
+        const jInput = document.getElementById('particleJsonFiles');
+        const tInput = document.getElementById('particleTexFiles');
+        const autoFixEl = document.getElementById('autoFixParticlePath');
+        const jFiles = jInput ? Array.from(jInput.files) : new Array();
+        const tFiles = tInput ? Array.from(tInput.files) : new Array();
+        const autoFix = autoFixEl ? autoFixEl.checked : true;
+
+        for (const tf of tFiles) folder.file(`textures/particle/${tf.name}`, await tf.arrayBuffer());
+        for (const jf of jFiles) {
+            let txt = await jf.text();
+            if (autoFix && tFiles.length > 0) {
+                try {
+                    const p = JSON.parse(txt); const br = p?.particle_effect?.description?.basic_render_parameters;
+                    if (br) {
+                        const target = (tFiles.length === 1) ? tFiles.at(0) : tFiles.find(t => t.name.replace(/\.png$/i, '') === (br.texture || '').split('/').pop().replace(/\.png$/i, ''));
+                        if (target) { br.texture = `textures/particle/${target.name.replace(/\.png$/i, '')}`; txt = JSON.stringify(p, null, 2); }
+                    }
+                } catch (e) {}
+            }
+            folder.file(`particles/${jf.name}`, txt);
+        }
+    }
+
+    function writeBpFiles(folder, manifest) {
+        folder.file("manifest.json", JSON.stringify(manifest, null, 2));
+        bpItems.forEach(it => {
+            folder.file(`items/${it.shortName}.json`, JSON.stringify({ format_version: "1.20.50", "minecraft:item": { description: { identifier: it.identifier, menu_category: { category: "equipment" } }, components: { "minecraft:display_name": { value: it.displayName }, "minecraft:damage": { value: it.damage }, "minecraft:max_stack_size": 1 } } }, null, 2));
+        });
+        bpMobs.forEach(m => {
+            folder.file(`entities/${m.shortName}.json`, JSON.stringify({ format_version: "1.20.50", "minecraft:entity": { description: { identifier: m.identifier, is_spawnable: true, is_summonable: true }, components: { "minecraft:health": { value: m.health, max: m.health }, "minecraft:movement": { value: 0.25 }, "minecraft:physics": {}, "minecraft:navigation.walk": { can_walk: true }, "minecraft:behavior.random_stroll": { priority: 1, speed_multiplier: 1.0 } } } }, null, 2));
+        });
+        folder.file(document.getElementById('scriptEntry').value.trim() || "scripts/main.js", document.getElementById('jsEditor').value);
+    }
+    function createSimpleZip() {
+        const files = new Array();
+        const encoder = new TextEncoder();
+        const crcTable = new Array();
+        for (let i = 0; i < 256; i++) {
+            let c = i;
+            for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+            crcTable.push(c >>> 0);
+        }
+        function calcCrc32(u8) {
+            let crc = 0xffffffff;
+            for (let i = 0; i < u8.length; i++) crc = crcTable.at((crc ^ u8.at(i)) & 0xff) ^ (crc >>> 8);
+            return (crc ^ 0xffffffff) >>> 0;
+        }
+        function getDosDateTime() {
+            const now = new Date();
+            const year = Math.max(1980, now.getFullYear()) - 1980;
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const hours = now.getHours();
+            const mins = now.getMinutes();
+            const secs = Math.floor(now.getSeconds() / 2);
+            return {
+                dosDate: ((year << 9) | (month << 5) | day) & 0xffff,
+                dosTime: ((hours << 11) | (mins << 5) | secs) & 0xffff
+            };
+        }
+        function makeFolderApi(prefix) {
+            return {
+                folder(sub) { return makeFolderApi(prefix + sub.replace(/^\/|\/$/g, '') + '/'); },
+                file(path, data) {
+                    const fullPath = prefix + path.replace(/^\//, '');
+                    let u8 = (typeof data === 'string') ? encoder.encode(data) : (data instanceof ArrayBuffer ? new Uint8Array(data) : encoder.encode(String(data)));
+                    files.push({ name: encoder.encode(fullPath), data: u8, crc: calcCrc32(u8) });
+                }
+            };
+        }
+        const rootApi = makeFolderApi('');
+        rootApi.generateBlob = function() {
+            const localChunks = new Array(), centralChunks = new Array();
+            const { dosDate, dosTime } = getDosDateTime();
+            let offset = 0;
+            files.forEach(f => {
+                const nLen = f.name.length, dLen = f.data.length;
+                const lh = new ArrayBuffer(30 + nLen), lv = new DataView(lh);
+                lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(6, 0x0800, true);
+                lv.setUint16(10, dosTime, true); lv.setUint16(12, dosDate, true);
+                lv.setUint32(14, f.crc, true); lv.setUint32(18, dLen, true); lv.setUint32(22, dLen, true); lv.setUint16(26, nLen, true);
+                new Uint8Array(lh, 30).set(f.name); localChunks.push(lh, f.data);
+
+                const ch = new ArrayBuffer(46 + nLen), cv = new DataView(ch);
+                cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0x0800, true);
+                cv.setUint16(12, dosTime, true); cv.setUint16(14, dosDate, true);
+                cv.setUint32(16, f.crc, true); cv.setUint32(20, dLen, true); cv.setUint32(24, dLen, true); cv.setUint16(28, nLen, true); cv.setUint32(42, offset, true);
+                new Uint8Array(ch, 46).set(f.name); centralChunks.push(ch);
+                offset += 30 + nLen + dLen;
+            });
+            const cdSize = centralChunks.reduce((acc, b) => acc + b.byteLength, 0);
+            const eocd = new ArrayBuffer(22), ev = new DataView(eocd);
+            ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+            ev.setUint32(12, cdSize, true); ev.setUint32(16, offset, true);
+            return new Blob(new Array(...localChunks, ...centralChunks, eocd), { type: "application/zip" });
+        };
+        return rootApi;
+    }
+
+    async function downloadPack() {
+        try {
+            const zip = createSimpleZip();
+            const type = document.getElementById('packType').value;
+            const fmt = document.getElementById('fileFormat').value;
+            const packName = (document.getElementById('packName').value || "custom_pack").replace(/[^a-zA-Z0-9_-]/g, '_');
+
+            if (type === 'addon') {
+                await writeRpFiles(zip.folder(`${packName}_RP`), buildResourceManifest(true), packName);
+                writeBpFiles(zip.folder(`${packName}_BP`), buildBehaviorManifest(true));
+            } else if (type === 'resources') {
+                await writeRpFiles(zip, buildResourceManifest(false), packName);
+            } else {
+                writeBpFiles(zip, buildBehaviorManifest(false));
+            }
+
+            const ext = (fmt === 'zip') ? 'zip' : (type === 'addon' ? 'mcaddon' : 'mcpack');
+            const blob = zip.generateBlob();
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = `${packName}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 2000);
+        } catch (err) {
+            alert("ダウンロードエラー:\n" + (err && err.message ? err.message : String(err)));
+        }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        initScriptUI();
+        regenerateUUIDs();
+        resetJsEditor();
+        loadBuilderPreset('humanoid');
+        initItem2DGrid();
+        setupItem2DCanvasEvents();
+        attachCanvasControl('canvas2D', draw2DEditor);
+        attachCanvasControl('canvas3DModel', () => render3DScene('canvas3DModel', null));
+        attachCanvasControl('canvas3DAnim', () => render3DScene('canvas3DAnim', getCurrentAnimTransforms()));
+        requestAnimationFrame(animLoop);
+    });
+</script>
+</body>
+</html>
